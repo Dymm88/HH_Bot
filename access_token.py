@@ -1,7 +1,15 @@
 import requests
 from dotenv import load_dotenv, set_key
 
-from config import CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, TOKEN, HEADERS, REFRESH_TOKEN, APPLICATION
+from config import (
+    CLIENT_ID,
+    CLIENT_SECRET,
+    REDIRECT_URI,
+    TOKEN,
+    HEADERS,
+    REFRESH_TOKEN,
+    APPLICATION,
+)
 
 load_dotenv()
 
@@ -42,7 +50,6 @@ def get_access_token(auth_code: str) -> None:
         set_key(".env", "REFRESH_TOKEN", r.json()["refresh_token"])
 
 
-
 def refresh_token() -> None:
     """
     Функция для обновления токена доступа.
@@ -61,7 +68,6 @@ def refresh_token() -> None:
     if "access_token" in r.json() and "refresh_token" in r.json():
         set_key(".env", "TOKEN", r.json()["access_token"])
         set_key(".env", "REFRESH_TOKEN", r.json()["refresh_token"])
-
 
 
 def check_token_and_application() -> None:

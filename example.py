@@ -9,15 +9,15 @@ from params import params_All
 
 
 async def get_vacancies(params):
-    url = 'https://api.hh.ru/vacancies'
+    url = "https://api.hh.ru/vacancies"
     async with aiohttp.ClientSession() as session:
         while True:
             async with session.get(url, headers=HEADERS, params=params) as r:
                 print(r.status)
                 vacancy_list = []
                 items = await r.json()
-                vacancy_list += items['items']
-                if items['pages'] == params['page'] + 1:
+                vacancy_list += items["items"]
+                if items["pages"] == params["page"] + 1:
                     break
                 params["page"] += 1
         print(vacancy_list)
@@ -43,8 +43,9 @@ async def response_vacancies(list_vacancies):
 
 async def send_vacancy(session, item, success):
     async with session.post(
-            f"https://api.hh.ru/negotiations?resume_id={RESUME_ID}"
-            f"&vacancy_id={str(item)}&message={MESSAGE_TEXT}", headers=HEADERS
+        f"https://api.hh.ru/negotiations?resume_id={RESUME_ID}"
+        f"&vacancy_id={str(item)}&message={MESSAGE_TEXT}",
+        headers=HEADERS,
     ) as r:
         match r.status:
             case 201:

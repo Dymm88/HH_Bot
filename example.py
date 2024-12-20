@@ -62,14 +62,3 @@ async def response_vacancies(list_vacancies: list[int]) -> None:
         results = await asyncio.gather(*tasks)
     success = sum(results)
     logger.info(f"Количество отправленных отзывов - {success}")
-
-
-async def main() -> None:
-    params = params_All.copy()
-    vacancy_list = await get_vacancies(params)
-    list_vacancies = await vacancy_ids(vacancy_list)
-    await response_vacancies(list_vacancies)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())

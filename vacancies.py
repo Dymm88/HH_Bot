@@ -1,66 +1,63 @@
-import requests
+import asyncio
+import logging
 
-from black_list import get_black_list, put_in_black_list
+import aiohttp
+
+from black_list import put_in_black_list, get_black_list
 from config import HEADERS, RESUME_ID
 from message import MESSAGE_TEXT
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-def get_vacancies(
-    params: dict[str, str | int | bool]
-) -> list[dict[str, str | int | bool | None]]:
-    """
-    Функция для получения вакансий.
+API_BASE_URL = "https://api.hh.ru"
 
-    :param params: Параметры запроса
-    :return: список вакансий
-    """
+
+async def get_vacancies(params: dict[str | None]) -> list[dict[str | None]]:
+    url = f"{API_BASE_URL}/vacancies"
     vacancy_list = []
-    url = "https://api.hh.ru/vacancies"
-    while True:
-        r = requests.get(url=url, headers=HEADERS, params=params)
-        items = r.json()["items"]
-        vacancy_list += items
-        if r.json()["pages"] == params["page"] + 1:
-            break
-        params["page"] += 1
+    async with aiohttp.ClientSession() as session:
+        while True:
+            async with session.get(url, headers=HEADERS, params=params) as response:
+                if response.status != 200:
+                    logger.error(f"Failed to fetch vacancies: HTTP {response.status}")
+                    break
+                items = await response.json()
+                vacancy_list.extend(items["items"])
+                if items["pages"] == params["page"] + 1:
+                    break
+                params["page"] += 1
     return vacancy_list
 
 
-def vacancy_ids(vacancy_list: list[dict[str, str | int | bool | None]]) -> list[int]:
-    """
-    Функция для извлечения идентификаторов вакансий.
-
-    :param vacancy_list: Список вакансий
-    :return: список идентификаторов вакансий, исключая компании из черного списка
-    """
+async def vacancy_ids(vacancy_list: list[dict[str | None]]) -> list[int]:
     vacancy_list_id = [vacancy["id"] for vacancy in vacancy_list]
     put_in_black_list(vacancy_list)
     ended_vacancy_list = list(set(vacancy_list_id) - set(get_black_list()))
     return ended_vacancy_list
 
 
-def response_vacancies(list_vacancies: list[int]) -> None:
-    """
-    Функция для отправки резюме с сопроводительным письмом на полученные вакансии.
+async def send_vacancy(session: aiohttp.ClientSession, item: int) -> bool:
+    url = f"{API_BASE_URL}/negotiations"
+    params = {"resume_id": RESUME_ID, "vacancy_id": str(item), "message": MESSAGE_TEXT}
+    async with session.post(url, headers=HEADERS, params=params) as response:
+        if response.status == 201:
+            logger.info(f"Резюме успешно отправлено на вакансию {item}")
+            return True
+        elif response.status == 200:
+            logger.info(f"Необходимо выполнение задания для вакансии {item}")
+        elif response.status == 400:
+            logger.warning("Лимит на количество отправленных резюме")
+        else:
+            logger.error(
+                f"Произошла ошибка при отправке резюме на вакансию {item}: {response.status}"
+            )
+    return False
 
-    :param list_vacancies: Список идентификаторов вакансий
-    """
-    success = 0
-    for item in list_vacancies:
-        r = requests.post(
-            f"https://api.hh.ru/negotiations?resume_id={RESUME_ID}&vacancy_id={str(item)}&message={MESSAGE_TEXT}",
-            headers=HEADERS,
-        )
-        match r.status_code:
-            case 201:
-                success += 1
-                print(f"Резюме успешно отправлено на вакансию {item}")
-            case 200:
-                print(f"Необходимо выполнение задания для вакансии {item}")
-            case 400:
-                print(f"Лимит на количество отправленных резюме")
-            case _:
-                print(
-                    f"Произошла ошибка при отправке резюме на вакансию {item}: {r.status_code}"
-                )
-    print(f"Количество отправленных отзывов - {success}")
+
+async def response_vacancies(list_vacancies: list[int]) -> None:
+    async with aiohttp.ClientSession() as session:
+        tasks = [send_vacancy(session, item) for item in list_vacancies]
+        results = await asyncio.gather(*tasks)
+    success = sum(results)
+    logger.info(f"Количество отправленных отзывов - {success}")

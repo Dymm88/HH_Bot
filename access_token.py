@@ -53,6 +53,15 @@ def get_access_token(auth_code: str) -> None:
 def refresh_token() -> None:
     """
     Функция для обновления токена доступа.
+
+    Обращается к API HeadHunter с целью обновления токена доступа с использованием refresh токена.
+    Если в ответе есть access_token и refresh_token, они сохраняются в файл .env.
+
+    Parameters:
+    None
+
+    Returns:
+    None
     """
     url = "https://hh.ru/oauth/token"
     headers = {
@@ -73,6 +82,16 @@ def refresh_token() -> None:
 def check_token_and_application() -> None:
     """
     Функция для проверки валидности токена и приложения.
+
+    Обращается к API HeadHunter с целью проверки валидности токена доступа и приложения.
+    Если ответ содержит статус 200, это означает, что токен и приложение валидны.
+    В противном случае, токен или приложение невалидны.
+
+    Parameters:
+    None
+
+    Returns:
+    None
     """
     url = "https://api.hh.ru/me"
     r = requests.get(url=url, headers=HEADERS)

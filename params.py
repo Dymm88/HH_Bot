@@ -6,7 +6,7 @@ params_SPb = {  # параметры для поиска вакансий в SPb
     "area": 2,
     "period": 7,
     "schedule": "remote",
-    "salary": 180_000,
+    "salary": 200_000,
     "search_field": "name",
 }
 
@@ -18,7 +18,7 @@ params_All = {  # параметры для поиска вакансий по �
     "area": 113,
     "period": 7,
     "schedule": "remote",
-    "salary": 180_000,
+    "salary": 200_000,
     "search_field": "name",
 }
 

@@ -32,8 +32,8 @@ async def get_vacancies(params: dict[str | None]) -> list[dict[str | None]]:
 
 async def vacancy_ids(vacancy_list: list[dict[str | None]]) -> list[int]:
     vacancy_list_id = [vacancy["id"] for vacancy in vacancy_list]
-    put_in_black_list(vacancy_list)
-    ended_vacancy_list = list(set(vacancy_list_id) - set(get_black_list()))
+    await put_in_black_list(vacancy_list)
+    ended_vacancy_list = list(set(vacancy_list_id) - set(await get_black_list()))
     return ended_vacancy_list
 
 

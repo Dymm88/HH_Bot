@@ -1,30 +1,35 @@
-import requests
+import aiohttp
 
 from config import HEADERS
 from params import companies
 
 
-def put_in_black_list(vacancy_list: tuple[str]) -> None:
+async def put_in_black_list(vacancy_list: tuple[str]) -> None:
     """
-    Функция для добавления компаний в черный список.
+    Асинхронная функция для добавления компаний в черный список.
 
     :param vacancy_list: Список компаний
     """
-    for name in vacancy_list:
-        if name["employer"]["name"] in companies:
-            requests.put(
-                url=f"https://api.hh.ru/vacancies/blacklisted/{name['id']}",
-                headers=HEADERS,
-            )
+    async with aiohttp.ClientSession() as session:
+        for name in vacancy_list:
+            if name["employer"]["name"] in companies:
+                url = f"https://api.hh.ru/vacancies/blacklisted/{name['id']}"
+                async with session.put(url=url, headers=HEADERS) as response:
+                    if response.status != 200:
+                        print(
+                            f"Не удалось добавить компанию {name['employer']['name']} в черный список."
+                        )
 
 
-def get_black_list() -> list:
+async def get_black_list() -> list:
     """
-    Функция для получения черного списка компаний.
+    Асинхронная функция для получения черного списка компаний.
 
     :return: Список идентификаторов компаний в черном списке
     """
     url = "https://api.hh.ru/vacancies/blacklisted"
-    r = requests.get(url=url, headers=HEADERS)
-    black_list = (t["id"] for t in r.json()["items"])
-    return list(black_list)
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url=url, headers=HEADERS) as response:
+            black_list_data = await response.json()
+            black_list = [t["id"] for t in black_list_data["items"]]
+            return black_list

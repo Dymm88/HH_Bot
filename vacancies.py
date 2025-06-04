@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 API_BASE_URL = "https://api.hh.ru"
 
 
-async def get_vacancies(params: dict[str, str | None]) -> list[dict[str, str  | None]]:
+async def get_vacancies(params: dict[str, str | None]) -> list[dict[str, str | None]]:
     url = f"{API_BASE_URL}/vacancies"
     vacancy_list = []
     async with aiohttp.ClientSession() as session:

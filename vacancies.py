@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 API_BASE_URL = "https://api.hh.ru"
 
 
-async def get_vacancies(params: dict[str | None]) -> list[dict[str | None]]:
+async def get_vacancies(params: dict[str, str | None]) -> list[dict[str, str  | None]]:
     url = f"{API_BASE_URL}/vacancies"
     vacancy_list = []
     async with aiohttp.ClientSession() as session:
@@ -30,7 +30,7 @@ async def get_vacancies(params: dict[str | None]) -> list[dict[str | None]]:
     return vacancy_list
 
 
-async def vacancy_ids(vacancy_list: list[dict[str | None]]) -> list[int]:
+async def vacancy_ids(vacancy_list: list[dict[str, str | None]]) -> list[int]:
     vacancy_list_id = [vacancy["id"] for vacancy in vacancy_list]
     await put_in_black_list(vacancy_list)
     ended_vacancy_list = list(set(vacancy_list_id) - set(await get_black_list()))

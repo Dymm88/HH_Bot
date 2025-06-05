@@ -6,7 +6,7 @@
 2. Зарегистрировать приложение на сайте https://dev.hh.ru/
 3. Создать проект
 4. Активировать виртуальное окружение
-5. Клонировать репозиторий `git clone https://github.com/Dymm88/SearchVacanciesHH . `
+5. Клонировать репозиторий `git clone https://github.com/Dymm88/HH_Bot . `
 6. Применить зависимости `pip install -r requirements.txt`
 7. Создать файл `.env` в корневой папке проекта
 8. Поместить в этот файл **CLIENT_ID**, **CLIENT_SECRET**, **REDIRECT_URI**(можно адрес аккаунта telegram),

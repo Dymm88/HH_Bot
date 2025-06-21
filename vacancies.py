@@ -44,11 +44,10 @@ async def send_vacancy(session: aiohttp.ClientSession, item: int) -> bool:
         if response.status == 201:
             logger.info(f"Резюме успешно отправлено на вакансию {item}")
             return True
-        elif response.status == 400:
-            logger.warning("Лимит на количество отправленных резюме")
         else:
+            error_data = await response.json()
             logger.error(
-                f"Произошла ошибка при отправке резюме на вакансию {item}: {response.status}"
+                f"Произошла ошибка при отправке резюме на вакансию {item}: {error_data}"
             )
     return False
 
